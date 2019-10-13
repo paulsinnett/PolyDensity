@@ -1,11 +1,8 @@
-﻿Shader "Unlit/PolyDensity"
+﻿Shader "Optimise/PolyDensity"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Highlight ("Highlight Colour", Color) = (1, 0, 0, 0.5)
-        _Smallest ("Smallest", Float) = 0.001
-        _Largest ("Largest", Float) = 0.1
     }
     SubShader
     {
@@ -36,9 +33,6 @@
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-            fixed4 _Highlight;
-            float _Smallest;
-            float _Largest;
 
             v2f vert (appdata v)
             {
@@ -63,7 +57,7 @@
                 float2 ab = input[1].density.xy - input[0].density.xy;
                 float2 cd = input[2].density.xy - input[0].density.xy;
                 float area = sqrt(abs(ab.x * cd.y - cd.x * ab.y));
-                float density = (area - _Smallest) / _Largest;
+                float density = (area - 0.001) / 0.01;
 
                 v2f test = (v2f)0;
                 for(int i = 0; i < 3; i++)
@@ -78,7 +72,7 @@
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 col = tex2D(_MainTex, i.uv);
-                return lerp(col, _Highlight, i.density.z * _Highlight.a);
+                return lerp(col, fixed4(1, 0, 0, 1), i.density.z * 0.8);
             }
             ENDCG
         }
